@@ -1,0 +1,59 @@
+from django.contrib.auth.models import User
+from news.models import Author, Category, Post, PostCategory, Comment
+
+# 1. Создаем пользователей
+user1 = User.objects.create_user('user1')
+user2 = User.objects.create_user('user2')
+
+# 2. Создаем Авторов
+author1 = Author.objects.create(user=user1)
+author2 = Author.objects.create(user=user2)
+
+# 3. Создаем 4 категории
+cat1 = Category.objects.create(name='Спорт')
+cat2 = Category.objects.create(name='Политика')
+cat3 = Category.objects.create(name='Образование')
+cat4 = Category.objects.create(name='Наука')
+
+# 4. Создаем 2 статьи и 1 новость
+post1 = Post.objects.create(author=author1, type=Post.ARTICLE, title='Статья 1', text='Текст первой статьи')
+post2 = Post.objects.create(author=author2, type=Post.ARTICLE, title='Статья 2', text='Текст второй статьи')
+post3 = Post.objects.create(author=author1, type=Post.NEWS, title='Новость 1', text='Текст новости')
+
+# 5. Присваиваем категории
+PostCategory.objects.create(post=post1, category=cat1)
+PostCategory.objects.create(post=post1, category=cat2)
+PostCategory.objects.create(post=post2, category=cat3)
+PostCategory.objects.create(post=post3, category=cat4)
+
+# 6. Создаем 4 комментария
+c1 = Comment.objects.create(post=post1, user=user1, text='Коммент 1')
+c2 = Comment.objects.create(post=post1, user=user2, text='Коммент 2')
+c3 = Comment.objects.create(post=post2, user=user1, text='Коммент 3')
+c4 = Comment.objects.create(post=post3, user=user2, text='Коммент 4')
+
+# 7. Лайки и дизлайки
+post1.like()
+post1.like()
+c1.like()
+c2.dislike()
+post2.like()
+
+# 8. Обновляем рейтинги
+author1.update_rating()
+author2.update_rating()
+
+# 9. Выводим лучшего пользователя
+best_author = Author.objects.order_by('-rating').first()
+print(f"Лучший пользователь: {best_author.user.username}, Рейтинг: {best_author.rating}")
+# Результат: Лучший пользователь: user1, Рейтинг: 7
+
+# 10. Выводим лучшую статью
+best_post = Post.objects.order_by('-rating').first()
+print(f"Дата: {best_post.created_at}, Автор: {best_post.author.user.username}, Рейтинг: {best_post.rating}, Заголовок: {best_post.title}, Превью: {best_post.preview()}")
+# Результат: Дата: 2026-10-21 18:12:32.270664+00:00, Автор: user1, Рейтинг: 2, Заголовок: Статья 1, Превью: Текст первой статьи...
+
+# 11. Выводим комментарии
+print("Комментарии к лучшей статье:")
+for comment in best_post.comment_set.all():
+    print(f"{comment.created_at} - {comment.user.username} (Рейтинг: {comment.rating}): {comment.text}")

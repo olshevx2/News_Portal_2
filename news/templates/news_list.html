@@ -1,0 +1,16 @@
+{% load my_filters %}
+<!DOCTYPE html>
+<html>
+<head><title>Новости</title></head>
+<body>
+    <h1>Все новости</h1>
+    {% for post in news %}
+        <div>
+            <h3>{{ post.title|censor }}</h3>
+            <p>{{ post.created_at|date:"d.m.Y" }} — {{ post.text|truncatechars:20|censor }}</p>
+        </div>
+    {% empty %}
+        <p>Новостей пока нет.</p>
+    {% endfor %}
+</body>
+</html>
